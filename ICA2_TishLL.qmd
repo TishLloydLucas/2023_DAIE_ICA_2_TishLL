@@ -1,0 +1,74 @@
+---
+title: "ICA2 Interactive RDBMS data with Quarto"
+author: "Tish Lloyd-Lucas D00263110"
+format: html
+editor: visual
+---
+
+---
+title: "ICA2 Interactive RDBMS data with Quarto"
+author: "Tish Lloyd-Lucas"
+format: html
+---
+
+## Introduction
+
+This notebook demonstrates three SQL concepts: SELECT with LIKE and OR, SELECT with DISTINCT and ORDER BY, and Subquery with SELECT.
+
+## Setup
+
+```{r}
+library(DBI) 
+library(RSQLite) 
+library(kableExtra) 
+
+# Connect to the SQLite database 
+con <- dbConnect(RSQLite::SQLite(), "/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite")
+```
+
+## 1. SELECT with LIKE and OR
+
+```{r}
+# Execute the first query
+query1 <- dbGetQuery(con, "SELECT CustomerName, CustomerCity FROM Customers WHERE CustomerName LIKE 'N%' OR CustomerCountry LIKE '%UK';")
+
+# Display results
+kable(query1, caption = "Customers whose names start with 'N' or countries contain 'UK'") %>% 
+  kable_styling()
+
+```
+
+## 2. SELECT with DISTINCT and ORDER BY
+
+```{r}
+# Execute the second query with alphabetical ordering
+query2 <- dbGetQuery(con, "SELECT DISTINCT ProjectName FROM Projects ORDER BY ProjectName ASC;")
+
+# Display results
+kable(query2, caption = "Project names, ordered alphabetically") %>% 
+  kable_styling()
+
+```
+
+## 3. Subquery with SELECT
+
+```{r}
+# Execute the query with subquery
+query3 <- dbGetQuery(con, "SELECT ProjectName, Budget FROM Projects WHERE Budget > (SELECT AVG(Budget) FROM Projects);")
+
+# Display results
+kable(query3, caption = "Projects with above average budget") %>% 
+  kable_styling()
+
+```
+
+## Conclusion
+
+This notebook has demonstrated three SQL concepts with practical examples.
+
+## Disconnect from the database
+
+```{r}
+dbDisconnect(con)
+
+```
