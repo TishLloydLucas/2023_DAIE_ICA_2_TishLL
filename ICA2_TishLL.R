@@ -1,3 +1,8 @@
+# ICA2 - PART A
+# Tish Lloyd-Lucas
+# D00263110
+
+
 install.packages("DBI")
 install.packages("RSQLite")
 install.packages("quarto")
@@ -142,3 +147,90 @@ Task3 <- dbGetQuery(con, query)
 
 # Print the result stored in Task3
 print(Task3)
+
+
+
+# ICA2 - PART B LINEAR REGRESSION
+
+# Load necessary libraries
+library(DBI) 
+library(RSQLite)
+
+# Connect to SQLite database
+con <- dbConnect(RSQLite::SQLite(), "/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite")
+
+# 1a: Calculate possible team size
+# Define the SQL query
+query <- "
+SELECT 
+    a.ProjectID,
+    COUNT(DISTINCT ad.DeveloperID) AS TeamSize
+FROM 
+    Assets a
+JOIN 
+    AssetsDevelopers ad ON a.AssetID = ad.AssetID
+GROUP BY 
+    a.ProjectID;
+"
+
+# Execute the query and store the result
+teamsize <- dbGetQuery(con, query)
+
+# Display the result
+print(teamsize)
+
+
+# 1b: Connect to the SQLite Database and Load Data
+# Load necessary libraries
+library(DBI)
+library(RSQLite)
+library(ggplot2)
+
+# Step 1: Connect to SQLite database
+con <- dbConnect(RSQLite::SQLite(), "/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite")
+
+# Extract the relevant data for analysis
+data <- dbGetQuery(con, "
+SELECT 
+    p.ProjectID,
+    p.ProjectName,
+    p.Budget,
+    COUNT(DISTINCT ad.DeveloperID) AS TeamSize
+FROM 
+    Projects p
+LEFT JOIN 
+    Assets a ON p.ProjectID = a.ProjectID
+LEFT JOIN 
+    AssetsDevelopers ad ON a.AssetID = ad.AssetID
+WHERE 
+    p.Status = 'Completed'
+GROUP BY 
+    p.ProjectID, p.ProjectName, p.Budget
+")
+
+# Calculate SuccessRate
+data$SuccessRate <- data$Budget / data$TeamSize
+
+
+# Step 2: Perform Linear Regression
+# Fit the linear regression model
+model <- lm(SuccessRate ~ Budget + TeamSize, data = data)
+
+# Display the summary of the model
+summary(model)
+
+
+# Step 3: Present the Data in an Appropriate Plot
+# Create a scatter plot with regression lines
+ggplot(data, aes(x = Budget, y = SuccessRate)) +
+  geom_point(aes(size = TeamSize), alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Linear Regression: Success Rate vs. Budget and Team Size",
+       x = "Budget",
+       y = "Success Rate",
+       size = "Team Size") +
+  theme_minimal()
+
+
+# Disconnect from the database
+dbDisconnect(con)

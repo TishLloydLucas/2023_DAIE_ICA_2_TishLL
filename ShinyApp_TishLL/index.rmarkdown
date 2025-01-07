@@ -1,0 +1,10 @@
+---
+title: "Interactive Shiny Dashboard TishLL"
+format: html
+---
+
+```{r}
+library(shiny)
+runApp("/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ShinyApp_TishLL/shiny_app")
+```
+

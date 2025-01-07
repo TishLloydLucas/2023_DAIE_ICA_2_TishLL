@@ -105,8 +105,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<section id="part-a---introduction" class="level2">
+<h2 class="anchored" data-anchor-id="part-a---introduction">Part A - Introduction</h2>
 <p>This notebook demonstrates three SQL concepts: SELECT with LIKE and OR, SELECT with DISTINCT and ORDER BY, and Subquery with SELECT.</p>
 </section>
 <section id="setup" class="level2">
@@ -262,6 +262,213 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="part-b---linear-regression" class="level2">
+<h2 class="anchored" data-anchor-id="part-b---linear-regression">Part B - Linear Regression</h2>
+<p><strong>1. Model:</strong> Perform linear regression to predict the success rate of a project based on its budget and team size and present the data in an appropriate plot.</p>
+<p>Step 1: Calculation of possible team size</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI) </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to SQLite database</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1a: Calculate possible team size</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the SQL query</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">    a.ProjectID,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(DISTINCT ad.DeveloperID) AS TeamSize</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="st">FROM </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">    Assets a</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="st">JOIN </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="st">    AssetsDevelopers ad ON a.AssetID = ad.AssetID</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st">    a.ProjectID;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Execute the query and store the result</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>teamsize <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, query)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the result</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(teamsize)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  ProjectID TeamSize
+1       101        6
+2       102        8
+3       103        6
+4       104        7</code></pre>
+</div>
+</div>
+<p>To calculate success rate, I divided budget by team size</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Connect to SQLite database</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the relevant data for analysis</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">    p.ProjectID,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">    p.ProjectName,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">    p.Budget,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="st">    COUNT(DISTINCT ad.DeveloperID) AS TeamSize</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="st">FROM </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="st">    Projects p</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="st">LEFT JOIN </span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="st">    Assets a ON p.ProjectID = a.ProjectID</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="st">LEFT JOIN </span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="st">    AssetsDevelopers ad ON a.AssetID = ad.AssetID</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE </span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="st">    p.Status = 'Completed'</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="st">GROUP BY </span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="st">    p.ProjectID, p.ProjectName, p.Budget</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="st">"</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate SuccessRate</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>SuccessRate <span class="ot">&lt;-</span> data<span class="sc">$</span>Budget <span class="sc">/</span> data<span class="sc">$</span>TeamSize</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Step 2: Perform Linear Regression</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the linear regression model</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(SuccessRate <span class="sc">~</span> Budget <span class="sc">+</span> TeamSize, <span class="at">data =</span> data)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the summary of the model</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = SuccessRate ~ Budget + TeamSize, data = data)
+
+Residuals:
+     1      2      3      4 
+-357.1  119.0  476.2 -238.1 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)  2.345e+04  2.870e+03   8.173   0.0775 .
+Budget       1.500e-01  7.897e-03  18.995   0.0335 *
+TeamSize    -3.571e+03  5.324e+02  -6.708   0.0942 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 652.1 on 1 degrees of freedom
+Multiple R-squared:  0.9977,    Adjusted R-squared:  0.993 
+F-statistic: 214.5 on 2 and 1 DF,  p-value: 0.04822</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Present the Data in an Appropriate Plot</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a scatter plot with regression lines</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> Budget, <span class="at">y =</span> SuccessRate)) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> TeamSize), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Linear Regression: Success Rate vs. Budget and Team Size"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Budget"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Success Rate"</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">size =</span> <span class="st">"Team Size"</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ICA2_TishLL_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Disconnect from the database</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>2. Interpret:</strong> Interpret the model coefficients and discuss what insights they provide about game development.</p>
+<p><strong>Interpretation</strong></p>
+<p><strong>Intercept</strong>:</p>
+<ul>
+<li><p><strong>Estimate</strong>: 23450</p></li>
+<li><p><strong>Interpretation</strong>: The Intercept (23450) represents the estimated success rate when both Budget and TeamSize are zero. While this scenario isn’t practical, it provides a baseline for the model.</p></li>
+</ul>
+<p><strong>Budget</strong>:</p>
+<ul>
+<li><p><strong>Estimate</strong>: 0.150</p></li>
+<li><p><strong>Interpretation</strong>: For every unit increase in the Budget, the SuccessRate increases by approximately 0.15, assuming TeamSize remains constant. This positive relationship indicates that higher budgets generally lead to higher success rates in game development projects, which makes sense as more resources can enhance development quality and efficiency.</p></li>
+</ul>
+<p><strong>TeamSize</strong>:</p>
+<ul>
+<li><p><strong>Estimate</strong>: -3571</p></li>
+<li><p><strong>Interpretation</strong>: For every additional team member, the SuccessRate decreases by approximately 3571, assuming the Budget remains constant. This negative relationship might be unexpected but could suggest issues such as coordination challenges, diluted responsibility, or diminishing returns with larger teams.</p></li>
+</ul>
+<p><strong>Residuals</strong></p>
+<p>Residuals represent the differences between the observed and predicted values of the SuccessRate. They help us understand the model’s accuracy:</p>
+<ul>
+<li><p><strong>Small residuals</strong> indicate that the model’s predictions are close to the observed values.</p></li>
+<li><p><strong>Large residuals</strong> might indicate outliers or areas where the model could be improved.</p></li>
+</ul>
+<p><strong>Model Summary</strong></p>
+<p><strong>Residual Standard Error (RSE)</strong>: 652.1</p>
+<p>RSE measures the average amount that the response variable deviates from the fitted values. Lower RSE indicates a better fit.</p>
+<p><strong>Multiple R-squared</strong>: 0.9977</p>
+<p>This value indicates that 99.77% of the variability in the SuccessRate is explained by the Budget and TeamSize variables combined. This is a very high value, suggesting an excellent model fit.</p>
+<p><strong>Adjusted R-squared</strong>: 0.993</p>
+<p>Adjusted R-squared accounts for the number of predictors in the model. An adjusted R-squared of 0.993 is still very high, reinforcing the model’s reliability.</p>
+<p><strong>F-statistic</strong>: 214.5</p>
+<p>A high F-statistic with a low p-value (0.04822) indicates that the model is statistically significant.</p>
+<p><strong>Insights for Game Development</strong></p>
+<ul>
+<li><p><strong>Budget</strong>: Investing in higher budgets tends to increase the success rate of game development projects. Ensuring adequate funding can help acquire better tools, talent, and other essential resources.</p></li>
+<li><p><strong>Team Size</strong>: The negative coefficient for team size suggests potential issues with larger teams. It might be beneficial to explore optimal team sizes that maximise efficiency without causing coordination issues.</p></li>
+<li><p><strong>Resource Optimisation</strong>: Balancing budget and team size is crucial. Over-reliance on either factor might not yield the best results.</p></li>
+</ul>
+<p><strong>Reliability and Outliers</strong></p>
+<ul>
+<li><p><strong>High R-squared</strong>: Indicates the model explains almost all the variability in the data.</p></li>
+<li><p><strong>Residual Analysis</strong>: The residuals and Cook’s distance should be examined further for outliers and influential points that could impact the model’s accuracy.</p></li>
+</ul>
+<p>Overall, the model provides valuable insights into the impact of budget and team size on project success rates, emphasising the importance of resource allocation and team management in game development.</p>
+<p><strong>3. Discuss:</strong> Comment on the reliability of the the linear regression model and any outliers present in the data.</p>
+<p><strong>Reliability of the Linear Regression Model Residual Standard Error (RSE):</strong></p>
+<ul>
+<li>The RSE is 652.1, which indicates the average amount that the observed success rates deviate from the predicted values. In this context, a lower RSE suggests a better model fit, indicating that the model predictions are relatively close to the actual data points.</li>
+</ul>
+<!-- -->
+<ul>
+<li><p><strong>Multiple R-squared (R²)</strong>:</p>
+<ul>
+<li>The R-squared value is 0.9977, meaning that approximately 99.77% of the variability in the success rates is explained by the budget and team size. This is an exceptionally high value, indicating the model fits the data very well and that budget and team size are significant predictors of success rate.</li>
+</ul></li>
+<li><p><strong>Adjusted R-squared</strong>:</p>
+<ul>
+<li>The adjusted R-squared is 0.993, which accounts for the number of predictors in the model. This value is very high, reinforcing the model’s reliability and indicating that the model explains a substantial portion of the variability in success rates.</li>
+</ul></li>
+<li><p><strong>F-statistic</strong>:</p>
+<ul>
+<li>The F-statistic is 214.5 with a p-value of 0.04822. This test evaluates the overall significance of the regression model. The low p-value (less than 0.05) indicates that the model is statistically significant, and there is a very low probability that the observed relationship between the predictors and the success rate is due to random chance.</li>
+</ul></li>
+</ul>
+<p><strong>Analysis of Outliers</strong></p>
+<p>Residuals represent the differences between the observed and predicted values of the success rate.</p>
+<p><strong>Residuals Analysis</strong>:</p>
+<ul>
+<li>The residuals vary from -357.1 to 476.2. The presence of relatively large residuals suggests there may be some data points where the model does not fit perfectly.</li>
+</ul>
+<p><strong>Cook’s Distance</strong>:</p>
+<ul>
+<li>To identify influential data points, we calculate Cook’s distance. Points with a high Cook’s distance might disproportionately affect the model, these points should be investigated as potential outliers or influential observations.</li>
+</ul>
+<p><strong>Potential Outliers</strong>:</p>
+<ul>
+<li>Based on the residuals, there appear to be some deviations from the predicted values, suggesting the presence of outliers. These outliers could be projects with unusual characteristics or measurement errors. Investigating these can provide insight into special cases or data quality issues.</li>
+</ul>
+<section id="conclusion-1" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion-1">Conclusion</h3>
+<p>The linear regression model demonstrates high reliability, with an excellent fit to the data as indicated by the high R-squared and adjusted R-squared values. The model’s significance is supported by the F-statistic and low p-value, indicating a strong relationship between the predictors (budget and team size) and the success rate.</p>
+<p>The presence of some large residuals suggests that there are outliers or influential data points that could impact the model’s accuracy. These should be investigated further to understand their nature and potential impact on the model.</p>
+<p>While the model is highly reliable and explains most of the variability in success rates, consideration of outliers and influential points is essential for ensuring the robustness and validity of the conclusions drawn.</p>
+</section>
 </section>
 
 </main>

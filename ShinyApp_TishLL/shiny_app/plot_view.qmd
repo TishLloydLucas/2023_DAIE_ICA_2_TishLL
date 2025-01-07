@@ -1,0 +1,5 @@
+---
+title: "Plot View"
+format: html
+---
+This is the Plot View page.

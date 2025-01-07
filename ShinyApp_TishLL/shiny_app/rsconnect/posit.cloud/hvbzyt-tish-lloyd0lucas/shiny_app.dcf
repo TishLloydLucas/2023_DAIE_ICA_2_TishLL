@@ -1,0 +1,10 @@
+name: shiny_app
+title: shiny_app
+username: hvbzyt-tish-lloyd0lucas
+account: hvbzyt-tish-lloyd0lucas
+server: posit.cloud
+hostUrl: https://api.posit.cloud/v1
+appId: 9503888
+bundleId: 9613250
+url: https://posit.cloud/content/9503888
+version: 1

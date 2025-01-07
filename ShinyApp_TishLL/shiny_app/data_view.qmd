@@ -1,0 +1,6 @@
+---
+title: "Data View"
+format: html
+---
+This is the Data View page.
+---

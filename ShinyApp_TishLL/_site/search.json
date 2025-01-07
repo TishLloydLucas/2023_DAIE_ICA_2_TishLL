@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Interactive Shiny Dashboard TishLL",
+    "section": "",
+    "text": "library(shiny) runApp(“shiny_app/app”)"
+  },
+  {
+    "objectID": "shiny_app/plot_view.html",
+    "href": "shiny_app/plot_view.html",
+    "title": "Plot View",
+    "section": "",
+    "text": "This is the Plot View page."
+  },
+  {
+    "objectID": "shiny_app/data_view.html",
+    "href": "shiny_app/data_view.html",
+    "title": "Data View",
+    "section": "",
+    "text": "This is the Data View page."
+  },
+  {
+    "objectID": "index.html#welcome-to-the-interactive-shiny-dashboard",
+    "href": "index.html#welcome-to-the-interactive-shiny-dashboard",
+    "title": "Interactive Shiny Dashboard TishLL",
+    "section": "",
+    "text": "This dashboard provides interactive visualizations for our data analysis project.\nUnfortunately, publishing is deprecated on Posit Cloud, and the process to sunset this feature began at the end of December, 2024, this content is no longer accessible. So that’s as far as I can go with this project unfortunately."
+  },
+  {
+    "objectID": "index.html#about-this-dashboard",
+    "href": "index.html#about-this-dashboard",
+    "title": "Interactive Shiny Dashboard TishLL",
+    "section": "About This Dashboard",
+    "text": "About This Dashboard\nThis dashboard was created using R Shiny and showcases various aspects of the data analysis, including:\n\nData visualization\nStatistical summaries\nInteractive plots\n\nFeel free to explore the different features and interact with the visualizations to gain insights into the dataset."
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "Interactive Shiny Dashboard TishLL",
+    "section": "How to Use",
+    "text": "How to Use\n\nUse the navigation menu to switch between different views.\nInteract with the plots and tables by clicking, hovering, or selecting options.\nAdjust any available parameters to customize the visualizations."
+  }
+]

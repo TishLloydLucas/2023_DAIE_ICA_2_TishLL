@@ -11,7 +11,7 @@ author: "Tish Lloyd-Lucas"
 format: html
 ---
 
-## Introduction
+## Part A - Introduction
 
 This notebook demonstrates three SQL concepts: SELECT with LIKE and OR, SELECT with DISTINCT and ORDER BY, and Subquery with SELECT.
 
@@ -72,3 +72,207 @@ This notebook has demonstrated three SQL concepts with practical examples.
 dbDisconnect(con)
 
 ```
+
+## Part B - Linear Regression
+
+[**1. Model:** Perform linear regression to predict the success rate of a project based on its budget and team size and present the data in an appropriate plot.]{.underline}
+
+Step 1: Calculation of possible team size
+
+```{r}
+# Load necessary libraries
+library(DBI) 
+library(RSQLite)
+
+# Connect to SQLite database
+con <- dbConnect(RSQLite::SQLite(), "/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite")
+
+# 1a: Calculate possible team size
+# Define the SQL query
+query <- "
+SELECT 
+    a.ProjectID,
+    COUNT(DISTINCT ad.DeveloperID) AS TeamSize
+FROM 
+    Assets a
+JOIN 
+    AssetsDevelopers ad ON a.AssetID = ad.AssetID
+GROUP BY 
+    a.ProjectID;
+"
+
+# Execute the query and store the result
+teamsize <- dbGetQuery(con, query)
+
+# Display the result
+print(teamsize)
+```
+
+To calculate success rate, I divided budget by team size
+
+```{r}
+# Load necessary libraries
+library(DBI)
+library(RSQLite)
+library(ggplot2)
+
+# Step 1: Connect to SQLite database
+con <- dbConnect(RSQLite::SQLite(), "/Volumes/ANIMATION/DkIT_MSc/YEAR_1__SEMESTER_1/DATA_ANALYTICS_Dr_Muhammad_Adil_Raja/I-CA2_LinearRegression/ICA2_RDBMS_Linear_Regression_TishLL/RDBMS_Linear_Regression/2023_DAIE_ICA_2_TishLL/ICA_2023.sqlite")
+
+# Extract the relevant data for analysis
+data <- dbGetQuery(con, "
+SELECT 
+    p.ProjectID,
+    p.ProjectName,
+    p.Budget,
+    COUNT(DISTINCT ad.DeveloperID) AS TeamSize
+FROM 
+    Projects p
+LEFT JOIN 
+    Assets a ON p.ProjectID = a.ProjectID
+LEFT JOIN 
+    AssetsDevelopers ad ON a.AssetID = ad.AssetID
+WHERE 
+    p.Status = 'Completed'
+GROUP BY 
+    p.ProjectID, p.ProjectName, p.Budget
+")
+
+# Calculate SuccessRate
+data$SuccessRate <- data$Budget / data$TeamSize
+```
+
+Step 2: Perform Linear Regression
+
+```{r}
+# Fit the linear regression model
+model <- lm(SuccessRate ~ Budget + TeamSize, data = data)
+
+# Display the summary of the model
+summary(model)
+
+
+# Step 3: Present the Data in an Appropriate Plot
+# Create a scatter plot with regression lines
+ggplot(data, aes(x = Budget, y = SuccessRate)) +
+  geom_point(aes(size = TeamSize), alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Linear Regression: Success Rate vs. Budget and Team Size",
+       x = "Budget",
+       y = "Success Rate",
+       size = "Team Size") +
+  theme_minimal()
+
+
+# Disconnect from the database
+dbDisconnect(con)
+```
+
+[**2. Interpret:** Interpret the model coefficients and discuss what insights they provide about game development.]{.underline}
+
+**Interpretation**
+
+**Intercept**:
+
+-   **Estimate**: 23450
+
+-   **Interpretation**: The Intercept (23450) represents the estimated success rate when both Budget and TeamSize are zero. While this scenario isn't practical, it provides a baseline for the model.
+
+**Budget**:
+
+-   **Estimate**: 0.150
+
+-   **Interpretation**: For every unit increase in the Budget, the SuccessRate increases by approximately 0.15, assuming TeamSize remains constant. This positive relationship indicates that higher budgets generally lead to higher success rates in game development projects, which makes sense as more resources can enhance development quality and efficiency.
+
+**TeamSize**:
+
+-   **Estimate**: -3571
+
+-   **Interpretation**: For every additional team member, the SuccessRate decreases by approximately 3571, assuming the Budget remains constant. This negative relationship might be unexpected but could suggest issues such as coordination challenges, diluted responsibility, or diminishing returns with larger teams.
+
+**Residuals**
+
+Residuals represent the differences between the observed and predicted values of the SuccessRate. They help us understand the model's accuracy:
+
+-   **Small residuals** indicate that the model's predictions are close to the observed values.
+
+-   **Large residuals** might indicate outliers or areas where the model could be improved.
+
+**Model Summary**
+
+**Residual Standard Error (RSE)**: 652.1
+
+RSE measures the average amount that the response variable deviates from the fitted values. Lower RSE indicates a better fit.
+
+**Multiple R-squared**: 0.9977
+
+This value indicates that 99.77% of the variability in the SuccessRate is explained by the Budget and TeamSize variables combined. This is a very high value, suggesting an excellent model fit.
+
+**Adjusted R-squared**: 0.993
+
+Adjusted R-squared accounts for the number of predictors in the model. An adjusted R-squared of 0.993 is still very high, reinforcing the model's reliability.
+
+**F-statistic**: 214.5
+
+A high F-statistic with a low p-value (0.04822) indicates that the model is statistically significant.
+
+**Insights for Game Development**
+
+-   **Budget**: Investing in higher budgets tends to increase the success rate of game development projects. Ensuring adequate funding can help acquire better tools, talent, and other essential resources.
+
+-   **Team Size**: The negative coefficient for team size suggests potential issues with larger teams. It might be beneficial to explore optimal team sizes that maximise efficiency without causing coordination issues.
+
+-   **Resource Optimisation**: Balancing budget and team size is crucial. Over-reliance on either factor might not yield the best results.
+
+**Reliability and Outliers**
+
+-   **High R-squared**: Indicates the model explains almost all the variability in the data.
+
+-   **Residual Analysis**: The residuals and Cook's distance should be examined further for outliers and influential points that could impact the model's accuracy.
+
+Overall, the model provides valuable insights into the impact of budget and team size on project success rates, emphasising the importance of resource allocation and team management in game development.
+
+[**3. Discuss:** Comment on the reliability of the the linear regression model and any outliers present in the data.]{.underline}
+
+**Reliability of the Linear Regression Model
+Residual Standard Error (RSE):**
+
+-   The RSE is 652.1, which indicates the average amount that the observed success rates deviate from the predicted values. In this context, a lower RSE suggests a better model fit, indicating that the model predictions are relatively close to the actual data points.
+
+<!-- -->
+
+-   **Multiple R-squared (R²)**:
+
+    -   The R-squared value is 0.9977, meaning that approximately 99.77% of the variability in the success rates is explained by the budget and team size. This is an exceptionally high value, indicating the model fits the data very well and that budget and team size are significant predictors of success rate.
+
+-   **Adjusted R-squared**:
+
+    -   The adjusted R-squared is 0.993, which accounts for the number of predictors in the model. This value is very high, reinforcing the model’s reliability and indicating that the model explains a substantial portion of the variability in success rates.
+
+-   **F-statistic**:
+
+    -   The F-statistic is 214.5 with a p-value of 0.04822. This test evaluates the overall significance of the regression model. The low p-value (less than 0.05) indicates that the model is statistically significant, and there is a very low probability that the observed relationship between the predictors and the success rate is due to random chance.
+
+**Analysis of Outliers**
+
+Residuals represent the differences between the observed and predicted values of the success rate.
+
+**Residuals Analysis**:
+
+-   The residuals vary from -357.1 to 476.2. The presence of relatively large residuals suggests there may be some data points where the model does not fit perfectly.
+
+**Cook's Distance**:
+
+-   To identify influential data points, we calculate Cook's distance. Points with a high Cook’s distance might disproportionately affect the model, these points should be investigated as potential outliers or influential observations.
+
+**Potential Outliers**:
+
+-   Based on the residuals, there appear to be some deviations from the predicted values, suggesting the presence of outliers. These outliers could be projects with unusual characteristics or measurement errors. Investigating these can provide insight into special cases or data quality issues.
+
+### Conclusion
+
+The linear regression model demonstrates high reliability, with an excellent fit to the data as indicated by the high R-squared and adjusted R-squared values. The model’s significance is supported by the F-statistic and low p-value, indicating a strong relationship between the predictors (budget and team size) and the success rate.
+
+The presence of some large residuals suggests that there are outliers or influential data points that could impact the model's accuracy. These should be investigated further to understand their nature and potential impact on the model.
+
+While the model is highly reliable and explains most of the variability in success rates, consideration of outliers and influential points is essential for ensuring the robustness and validity of the conclusions drawn.
