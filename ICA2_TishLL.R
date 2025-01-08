@@ -75,7 +75,7 @@ ORDER BY
 
 # Execute the query and store the result
 Task1 <- dbGetQuery(con, query)
-print(result)
+print(Task1)
 
 
 
